@@ -230,7 +230,8 @@ py::array_t<T> convert_img(const IMAGE &img)
 
 template <typename T>
 void write(IMAGE &img,
-           py::array_t < T, py::array::f_style | py::array::forcecast > b)
+           //py::array_t < T, py::array::f_style | py::array::forcecast > b)
+          py::buffer b)
 {
     if(img.array.raw == nullptr)
     {
@@ -1009,39 +1010,38 @@ PYBIND11_MODULE(ImageStreamIOWrap, m)
     py::arg("shared") = 1, py::arg("NBsem") = IMAGE_NB_SEMAPHORE,
     py::arg("NBkw") = 1, py::arg("imagetype") = MATH_DATA)
 
-    // .def(
-    //     "create",
-    //     [](IMAGE &img, std::string name, py::array_t<uint32_t> dims,
-    //        uint8_t datatype, uint8_t shared, uint16_t NBkw) {
-    //       /* Request a buffer descriptor from Python */
-    //       py::buffer_info info = dims.request();
+    .def(
+        "create",
+        [](IMAGE &img, std::string name, py::array_t<uint32_t> dims,
+           uint8_t datatype, uint8_t shared, uint16_t NBkw) {
+          /* Request a buffer descriptor from Python */
+          py::buffer_info info = dims.request();
 
-    //       // uint8_t datatype =
-    //       // PyFormatToImageStreamIODataType(info.format).datatype;
-    //       // std::vector<uint32_t> ushape(info.ndim);
-    //       // std::copy(info.shape.begin(), info.shape.end(),
-    //       ushape.begin());
+          // uint8_t datatype =
+          // PyFormatToImageStreamIODataType(info.format).datatype;
+          // std::vector<uint32_t> ushape(info.ndim);
+          // std::copy(info.shape.begin(), info.shape.end(), ushape.begin());
 
-    //       return ImageStreamIO_createIm(&img, name.c_str(), info.size,
-    //                                     (uint32_t *)info.ptr, datatype,
-    //                                     shared, NBkw);
-    //     },
-    //     R"pbdoc(
-    //       Create shared memory image stream
-    //       Parameters:
-    //           name     [in]:  the name of the shared memory file will be
-    //           SHAREDMEMDIR/<name>_im.shm dims     [in]:  np.array of the
-    //           image. datatype [in]:  data type code,
-    //           pyImageStreamIO.Datatype shared   [in]:  if true then a
-    //           shared memory buffer is allocated.  If false, only local
-    //           storage is used. NBkw     [in]:  the number of keywords to
-    //           allocate.
-    //       Return:
-    //           ret      [out]: error code
-    //       )pbdoc",
-    //     py::arg("name"), py::arg("dims"),
-    //     py::arg("datatype") = ImageStreamIODataType::DataType::FLOAT,
-    //     py::arg("shared") = 1, py::arg("NBkw") = 1)
+          return ImageStreamIO_createIm(&img, name.c_str(), info.size,
+                                        (uint32_t *)info.ptr, datatype,
+                                        shared, NBkw);
+        },
+        R"pbdoc(
+          Create shared memory image stream
+          Parameters:
+              name     [in]:  the name of the shared memory file will be
+                              SHAREDMEMDIR/<name>_im.shm
+              dims     [in]:  np.array of the image.
+              datatype [in]:  data type code, pyImageStreamIO.Datatype
+              shared   [in]:  if true then a shared memory buffer is allocated.
+                              If false, only local storage is used.
+              NBkw     [in]:  the number of keywords to allocate.
+          Return:
+              ret      [out]: error code
+          )pbdoc",
+        py::arg("name"), py::arg("dims"),
+        py::arg("datatype") = ImageStreamIODataType::DataType::FLOAT,
+        py::arg("shared") = 1, py::arg("NBkw") = 1)
 
     // .def(
     //     "create",
