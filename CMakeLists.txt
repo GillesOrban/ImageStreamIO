@@ -8,7 +8,7 @@ option(gtest_build_tests "Build Unit Tests" OFF)
 
 project(${LIBNAME} LANGUAGES C)
 
-add_compile_options(-Ofast)
+add_compile_options(-Ofast -std=c99)
 
 add_library(${LIBNAME} SHARED ${SRCNAME}.c)
 
